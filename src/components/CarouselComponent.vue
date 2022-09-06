@@ -49,9 +49,17 @@ export default {
   setup() {
     const q = useQuasar();
     q.loading.show();
-    watchEffect(() => useForecastStore().forecastList && q.loading.hide());
+    const currentSlide = ref('');
+
+    watchEffect(() => {
+      if (useForecastStore().forecastList) {
+        q.loading.hide();
+        currentSlide.value = useForecastStore().forecastToday.day.place[0].name;
+      }
+    });
+
     return {
-      slide: ref(''),
+      slide: currentSlide,
       store: useForecastStore(),
     };
   },
