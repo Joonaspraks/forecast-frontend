@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md">
+  <div class="q-pa-md" v-if="store.forecastToday">
     <q-carousel
       v-model="slide"
       transition-prev="slide-right"
@@ -8,65 +8,83 @@
       control-color="primary"
       class="rounded-borders"
     >
-      <q-carousel-slide name="style" class="column no-wrap flex-center">
-        <q-icon
-          name="style"
-          color="primary"
-          size="56px"
-          @click="fetchForecast"
-        />
-        <div class="q-mt-md text-center">
-          {{ lorem }}
-        </div>
-      </q-carousel-slide>
-      <q-carousel-slide name="tv" class="column no-wrap flex-center">
-        <q-icon name="live_tv" color="primary" size="56px" />
-        <div class="q-mt-md text-center">
-          {{ lorem }}
-        </div>
-      </q-carousel-slide>
-      <q-carousel-slide name="layers" class="column no-wrap flex-center">
-        <q-icon name="layers" color="primary" size="56px" />
-        <div class="q-mt-md text-center">
-          {{ lorem }}
-        </div>
-      </q-carousel-slide>
-      <q-carousel-slide name="map" class="column no-wrap flex-center">
-        <q-icon name="terrain" color="primary" size="56px" />
-        <div class="q-mt-md text-center">
-          {{ lorem }}
-        </div>
-      </q-carousel-slide>
+      <template
+        v-for="place in store.forecastToday.day.place"
+        :key="place.name"
+      >
+        <q-carousel-slide :name="place.name" class="column no-wrap flex-center">
+          <q-icon
+            :name="iconMap[place.phenomenon]"
+            color="primary"
+            size="56px"
+          />
+          <div class="q-mt-md text-center">
+            <li>Phenomenon: {{ place.phenomenon }}</li>
+            <li>Max temp: {{ place.tempmax }}</li>
+          </div>
+        </q-carousel-slide>
+      </template>
     </q-carousel>
     <div class="row justify-center">
       <q-btn-toggle
         glossy
         v-model="slide"
-        :options="[
-          { label: 1, value: 'style' },
-          { label: 2, value: 'tv' },
-          { label: 3, value: 'layers' },
-          { label: 4, value: 'map' },
-        ]"
+        :options="
+          store.forecastToday.day.place.map((p) => {
+            return {
+              label: p.name,
+              value: p.name,
+            };
+          })
+        "
       />
     </div>
   </div>
 </template>
 <script>
-import { api } from 'src/boot/axios';
-import { ref } from 'vue';
+import { useQuasar } from 'quasar';
+import { ref, watchEffect } from 'vue';
 import { useForecastStore } from '../stores/forecast-store';
 
 export default {
   setup() {
-    return {
-      slide: ref('style'),
-      lorem:
-        'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Itaque voluptatem totam, architecto cupiditate officia rerum, error dignissimos praesentium libero ab nemo provident incidunt ducimus iusto perferendis porro earum. Totam, numquam?',
-      logMessage: () => console.log('Hello'),
-      callApi: () => api.get('forecast').catch((error) => console.log(error)),
+    const q = useQuasar();
+    q.loading.show();
 
-      fetchForecast: useForecastStore().fetchForecast,
+    watchEffect(() => useForecastStore().forecastList && q.loading.hide());
+
+    return {
+      slide: ref(''),
+      store: useForecastStore(),
+      iconMap: {
+        Clear: 'sunny',
+        'Few clouds': 'sunny',
+        'Variable clouds': 'cloud',
+        'Cloudy with clear spells': 'cloud',
+        Cloudy: 'cloud',
+        'Light snow shower': 'ac_unit',
+        'Moderate snow shower': 'ac_unit',
+        'Heavy snow shower': 'ac_unit',
+        'Light shower': 'water_drop',
+        'Moderate shower': 'water_drop',
+        'Heavy shower': 'water_drop',
+        'Light rain': 'water_drop',
+        'Moderate rain': 'water_drop',
+        'Heavy rain': 'water_drop',
+        'Risk of glaze': 'ac_unit',
+        'Light sleet': 'ac_unit',
+        'Moderate sleet': 'ac_unit',
+        'Light snowfall': 'ac_unit',
+        'Moderate snowfall': 'ac_unit',
+        'Heavy snowfall': 'severe_cold',
+        Snowstorm: 'severe_cold',
+        'Drifting snow': 'severe_cold',
+        Hail: 'ac_unit',
+        Mist: 'cloud',
+        Fog: 'cloud',
+        Thunder: 'flash_on',
+        Thunderstorm: 'thunderstorm',
+      },
     };
   },
 };
