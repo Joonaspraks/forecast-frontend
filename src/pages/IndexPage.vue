@@ -1,5 +1,6 @@
 <template>
   <q-page class="row items-center justify-evenly">
+    <carousel-component />
     <example-component
       title="Example component"
       active
@@ -10,13 +11,14 @@
 </template>
 
 <script lang="ts">
-import { Todo, Meta } from 'components/models';
 import ExampleComponent from 'components/ExampleComponent.vue';
+import { Meta, Todo } from 'components/models';
 import { defineComponent, ref } from 'vue';
+import CarouselComponent from '../components/CarouselComponent.vue';
 
 export default defineComponent({
   name: 'IndexPage',
-  components: { ExampleComponent },
+  components: { ExampleComponent, CarouselComponent },
   setup() {
     const todos = ref<Todo[]>([
       {
