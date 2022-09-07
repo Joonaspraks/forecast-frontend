@@ -1,4 +1,4 @@
-# Forecasts (yotproov)
+# Forecasts
 
 A Quasar Project
 
